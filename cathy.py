@@ -1,19 +1,10 @@
 #!python3
 '''
-attempt to build a python class to read cathy's .caf file
+attempt to build a python class to read cathy's .caf file (by Jerome)
 2017/05/31  got entrydat.cpp from Robert Vasicek rvas01@gmx.net :)
 2017/06/02  first reading/struct. conversion from entrydat.cpp
 2017/06/03  first complete read of a .caf
             first query functions
-			
-USAGE
-
-# to search for something in all .caf files in the cwd
-python cathy.py search <searchitem>
-# to create a .caf file with the same name as the volume in cwd
-python cathy.py scan <path>
-# the same as scan but with Cathy archive set
-python cathy.py scanarchive <path>
 
 cat.pathcat		# catalogfilename in the cathy's ui
 cat.date
@@ -30,18 +21,7 @@ cat.elm will contain every element (folder name ot filename)
 cat.elm[69] returns a tuple with (date, size, parent folder id, filename)
 cat.info[folder id] returns a tuple with folder informations
 
-cat.pathcat		# catalogfilename in the cathy's ui
-cat.date
-cat.device
-cat.volume
-cat.alias
-cat.volumename
-cat.serial
-cat.comment
-cat.freesize
-cat.archive
-
-
+# Vincent continues with Jerome's code
 2021/03/09	All unpack formats fixed for endianness so the Python code will run on mac and linux systems
 2021/03/10	removed some modifications to the original code that I didn't worked correctly (at least not for me):
 			- 2 to 4 byte change in m_sPathName
@@ -59,14 +39,19 @@ cat.archive
 			- added some hacks so the code will run with python 2 as well as 3
 			- added command line arguments implementation for the search and scan functions
 
-'''
+USAGE
 
-#from __future__ import (print_function, unicode_literals, division)
-#__metaclass__ = type
+# to search for something in all .caf files in the cwd
+python cathy.py search <searchitem>
+# to create a .caf file with the same name as the volume in cwd
+python cathy.py scan <path>
+# the same as scan but with Cathy archive set
+python cathy.py scanarchive <path>
+
+'''
 
 from __future__ import (print_function, division)
 __metaclass__ = type
-
 
 import time,datetime
 import subprocess
@@ -95,7 +80,6 @@ class CathyCat() :
 		read a cathy .caf file
 		and import it into a python instance
 		'''
-
 		self.pathcat = pathcatname		# catalogfilename in the cathy's ui
 		self.date = m_timeDate
 		self.device = m_strDevice
