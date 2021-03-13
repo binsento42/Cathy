@@ -92,9 +92,7 @@ class CathyCat() :
 		self.archive = m_sArchive
 		self.totaldirs = 0
 		
-		#self.ptr_path = ptrpath # pointer from which to parse folder info
 		self.info = info
-		#self.ptr_files = ptr_files
 		self.elm = elm
 
 	@classmethod
@@ -105,7 +103,6 @@ class CathyCat() :
 		
 		# m_sVersion - Check the magic
 		ul = cls.readbuf('<L')
-		#print(ul%CathyCat.ulModus)
 		if ul > 0 and ul%CathyCat.ulModus == CathyCat.ulMagicBase : 
 			m_sVersion= int(ul/CathyCat.ulModus)
 		else :
@@ -117,7 +114,6 @@ class CathyCat() :
 		
 		if m_sVersion > CathyCat.sVersion :
 			return
-		#print("m_sVersion:",m_sVersion)
 		
 		# m_timeDate
 		m_timeDate = ctime(cls.readbuf('<L'))
@@ -161,48 +157,25 @@ class CathyCat() :
 			if m_sArchive == -1 :
 				m_sArchive = 0
 				
-		'''
-		self.pathcat = pathcatname		# catalogfilename in the cathy's ui
-		self.date = m_timeDate
-		self.device = m_strDevice
-		self.volume = m_strVolume
-		self.alias = m_strAlias
-		self.volumename = m_szVolumeName
-		self.serial = m_dwSerialNumber
-		self.comment = m_strComment
-		self.freesize = m_fFreeSize
-		self.archive = m_sArchive
-		
-		self.ptr_path = cls.buffer.tell() # pointer from which to parse folder info
-		ptrpath = cls.buffer.tell()
-		'''
-
 		# folder information : file count, total size
 		m_paPaths = []
 		lLen = cls.readbuf('<l')
-		#print(lLen)
 		tcnt = 0
 		for l in range(lLen) :
 			if l==0 or m_sVersion<=3 :
 				m_pszName = cls.readstring()
-				#print("m_pszName:",m_pszName)
 			if m_sVersion >= 3 :
 				m_lFiles = cls.readbuf('<l')
 				m_dTotalSize = cls.readbuf('<d')
-			#print(m_lFiles,m_dTotalSize)
 			m_paPaths.append( (tcnt, m_lFiles,m_dTotalSize) )
 			tcnt = tcnt + 1
 			
 		info = m_paPaths
-		
-		#ptr_files = cls.buffer.tell() # pointer from which to parse elements (file or folders)
-		
-		
+				
 		# files : date, size, parentfolderid, filename
 		# if it's a folder :  date, -thisfolderid, parentfolderid, filename
 		m_paFileList = []
 		lLen = cls.readbuf('<l')
-		#print(lLen)
 		for l in range(lLen) :
 			#elmdate = ctime(cls.readbuf('<L'))
 			elmdate = cls.readbuf('<L')
@@ -212,7 +185,6 @@ class CathyCat() :
 			else :
 				# m_lLength = cls.buffer.read(8)
 				m_lLength = cls.readbuf('<q') 
-			#m_sPathName = cls.readbuf('<l')  # in the .cpp I think m_sPathName wants 2 bytes but 4 works for me
 			m_sPathName = cls.readbuf('H')
 			m_pszName = cls.readstring()
 			m_paFileList.append((elmdate,m_lLength,m_sPathName,m_pszName))
@@ -230,12 +202,9 @@ class CathyCat() :
 		
 		# m_sVersion - Check the magic
 		ul = 3*CathyCat.ulModus+CathyCat.ulMagicBase
-		#print(ul)
 
 		if ul > 0 and ul%CathyCat.ulModus == CathyCat.ulMagicBase : 
 			m_sVersion= int(ul/CathyCat.ulModus)
-			#print(m_sVersion)
-
 
 		self.writebuf('<L',ul)
 		self.writebuf('h',CathyCat.saveVersion)
@@ -251,33 +220,10 @@ class CathyCat() :
 	
 		# m_strComment
 		self.writestring(self.comment)
-
-		#if m_sVersion >= 4  :
-		#	m_strComment = cls.readstring()
-		
-		# m_fFreeSize - Starting version 1 the free size was saved
 		self.writebuf('<f',self.freesize)
-
 			
 		# m_sArchive
 		self.writebuf('h',self.archive)
-
-				
-		'''
-		self.pathcat = pathcatname		# catalogfilename in the cathy's ui
-		self.date = m_timeDate
-		self.device = m_strDevice
-		self.volume = m_strVolume
-		self.alias = m_strAlias
-		self.volumename = m_szVolumeName
-		self.serial = m_dwSerialNumber
-		self.comment = m_strComment
-		self.freesize = m_fFreeSize
-		self.archive = m_sArchive
-		
-		self.ptr_path = cls.buffer.tell() # pointer from which to parse folder info
-		'''
-		#ptrpath = self.buffer.tell()
 
 		# folder information : file count, total size
 		self.writebuf('<l',len(self.info))
@@ -299,10 +245,7 @@ class CathyCat() :
 			self.writebuf('H',el[2]) #parentfolderid
 			self.writestring(el[3]) #filename
 
-
 		self.buffer.close()
-
-
 
 	def catpath(self) :
 		'''
@@ -400,7 +343,7 @@ class CathyCat() :
 
 	def writestring(self,inp) :
 		if version_info[0] == 2:
-			# some hack to allow the code to run on python2
+			# some hack to allow the code to run on python2 and not crash on decode errors
 			inp = inp.decode(errors='replace')
 		#print(inp.encode('utf-8',errors='replace'))
 		self.buffer.write(inp.encode('utf-8',errors='replace'))
@@ -408,6 +351,7 @@ class CathyCat() :
 
 	@classmethod
 	def get_device(cls,start_path):
+		# get the device from a mount path on linux
 		output=subprocess.check_output(['df',start_path]).decode().split('\n')
 		for line in output:
 			if start_path in line:
@@ -421,14 +365,11 @@ class CathyCat() :
 			device = cls.get_device(start_path)
 			output=subprocess.check_output(['sudo','blkid','-o','value','-s','UUID',device]).decode().strip()
 			ser = output[-8:-4]+"-"+output[-4:]
-			#print("Serial:",ser+"##")
 		elif platform == "darwin":
 			output=subprocess.check_output(['diskutil','info',start_path]).decode()
-			#print(type(output))
 			start = output.find("UUID:")+7
 			end = output.find('\n',start)
 			ser = output[end-8:end-4]+"-"+output[end-4:end]
-			#print(ser)
 		elif platform == "win32":
 		    pass
 		return ser
@@ -439,14 +380,11 @@ class CathyCat() :
 			device = cls.get_device(start_path)
 			output=subprocess.check_output(['sudo','blkid','-o','value','-s','LABEL',device]).decode().strip()
 			ser = output
-			#print("Label:",ser)
 		elif platform == "darwin":
 			output=subprocess.check_output(['diskutil','info',start_path]).decode()
-			#print(type(output))
 			start = output.find("Volume Name:")+12
 			end = output.find('\n',start)
 			ser = output[start:end].strip()
-			#print(ser)
 		elif platform == "win32":
 		    pass
 		return ser
@@ -457,19 +395,14 @@ class CathyCat() :
 			output=subprocess.check_output(['df']).decode().split('\n')
 			for line in output:
 				if start_path in line:
-					#print(line)
 					items = [x for x in line.split(' ') if x]
-					#print(len(items))
 					ser = float(items[3])
-			#print(ser)
 		elif platform == "darwin":
 			output=subprocess.check_output(['diskutil','info',start_path]).decode()
-			#print(type(output))
 			start = output.find("Free Space:")
 			start = output.find('(',start)+1
 			end = output.find('Bytes',start)
 			ser = float(output[start:end].strip())/1024
-			#print(ser)
 		elif platform == "win32":
 			import ctypes
 			free_bytes = ctypes.c_ulonglong(0)
@@ -487,14 +420,12 @@ class CathyCat() :
 		for el in os.listdir(start_path):
 			elem = os.path.join(start_path,el)
 			if os.path.isfile(elem):
-				#print("File:",elem)
 				filecnt = filecnt + 1
 				cursize = os.path.getsize(elem)
 				tsize = tsize + cursize
 				dat = os.path.getmtime(elem)
 				self.elm.append((int(dat),cursize,dir_id,el))
 			if os.path.isdir(elem):
-				#print("Dir:",elem)
 				self.totaldirs = self.totaldirs + 1
 				keepdir = self.totaldirs
 				dat = os.path.getmtime(elem)
@@ -503,12 +434,6 @@ class CathyCat() :
 				self.info.append((keepdir,fcnt,tsiz))
 				filecnt = filecnt + fcnt
 				tsize = tsize + tsiz
-				'''
-				try:
-					print(keepdir,dir_id,elem,fcnt,tsiz)
-				except:
-					pass
-				'''
 		return (dir_id,filecnt,tsize)
 
 	@classmethod
@@ -525,6 +450,7 @@ class CathyCat() :
 		freesize = cls.get_free_space(start_path)
 		archive = 0
 
+		# init empty CathyCat class
 		t_cat = cls(pathcat, date, device, volume, alias, volumename, serial, comment, freesize, archive, [], [])
 		t_cat.info.append(t_cat.scandir(0,start_path))
 		t_cat.info.sort()
@@ -589,7 +515,7 @@ if __name__ == '__main__':
 			cat.archive = 1
 			cat.write(setpath)
 	else:
-		print("Not enough arguments.\nUse cathy search <term> to search and 'cathy scan <path>' to scan a device.")
+		print("Not enough arguments.\nUse 'python cathy.py search <term>' to search and 'python cathy.py scan <path>' to scan a device.")
 
 
 
