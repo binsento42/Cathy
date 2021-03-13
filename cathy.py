@@ -8,15 +8,12 @@ attempt to build a python class to read cathy's .caf file
 			
 USAGE
 
-type a full path to your catalog .cat file like :
-	from os import getcwd
-	pth = getcwd()
-	catname = '-Downloads.caf'
-	pathcatname = os.path.join(pth,catname)
-
-create a python instance from the catalog :
-	from cathy import CathyCat
-	cat = CathyCat(pathcatname)
+# to search for something in all .caf files in the cwd
+python cathy.py search <searchitem>
+# to create a .caf file with the same name as the volume in cwd
+python cathy.py scan <path>
+# the same as scan but with Cathy archive set
+python cathy.py scanarchive <path>
 
 cat.pathcat		# catalogfilename in the cathy's ui
 cat.date
@@ -32,14 +29,6 @@ cat.archive
 cat.elm will contain every element (folder name ot filename)
 cat.elm[69] returns a tuple with (date, size, parent folder id, filename)
 cat.info[folder id] returns a tuple with folder informations
-
-#example
-import os
-from cathy import CathyCat
-pth = os.getcwd()
-catname = '-Downloads.caf'
-pathcatname = os.path.join(pth,catname)
-cat = CathyCat(pathcatname)
 
 cat.pathcat		# catalogfilename in the cathy's ui
 cat.date
@@ -58,6 +47,18 @@ cat.archive
 			- 2 to 4 byte change in m_sPathName
 			- [2:-1] truncation in catpath
 			Added search functions
+2021/03/11	Refactored the code to allow empty constructor and classmethods so it will be possible to write scan function in python
+			- CathyCat.from_file(path)
+2012/03/12	Added new functionality
+			- write function that can write a .caf file from a previously read file
+			- scan function that can create a .caf file, works for linux and osx. Windows not yet, but original Cathy (or CathyCmd) already works for windows.
+2012/03/13	Some more fixes
+			- tree wouldn't render right in the original Cathy; this was some trial and error and mainly caused by the order of the items in the list
+			- free space corrected for different platforms
+			- wrestled with Unicode / Ascii / str / byte troubles
+			- added some hacks so the code will run with python 2 as well as 3
+			- added command line arguments implementation for the search and scan functions
+
 '''
 
 #from __future__ import (print_function, unicode_literals, division)
@@ -259,31 +260,10 @@ class CathyCat() :
 		self.writestring(self.device)
 		self.writestring(self.volume)
 		self.writestring(self.alias)
-	
-		# m_strVolume, m_strAlias > m_szVolumeName
-		#m_strVolume = cls.readstring()
-		#m_strAlias = cls.readstring()
-	
-		#if len(m_strAlias) == 0 :
-		#	m_szVolumeName = m_strVolume
-		#else :
-		#	m_szVolumeName = m_strAlias
-	
-		# m_dwSerialNumber well, odd..
 
 		t_serial = self.serial.replace('-','')
 		serial_long = int(t_serial,16)
 		self.writebuf('<L',serial_long) # not sure if little endian is ok
-
-		#bytesn = cls.buffer.read(4)
-		#rawsn = b2a_hex(bytesn).decode().upper()
-		#sn = ''
-		#while rawsn :
-		#	chunk = rawsn[-2:]
-		#	rawsn = rawsn[:-2]
-		#	sn += chunk
-		#m_dwSerialNumber = '%s-%s'%(sn[:4],sn[4:])
-
 	
 		# m_strComment
 		self.writestring(self.comment)
@@ -293,17 +273,11 @@ class CathyCat() :
 		
 		# m_fFreeSize - Starting version 1 the free size was saved
 		self.writebuf('<f',self.freesize)
-		#if m_sVersion >= 1 : 
-		#	m_fFreeSize = cls.readbuf('<f') # as megabytes
-		#else :
-		#	m_fFreeSize = -1 # unknow
+
 			
 		# m_sArchive
 		self.writebuf('h',self.archive)
-		#if m_sVersion >= 6 :
-		#	m_sArchive = cls.readbuf('h')
-		#	if m_sArchive == -1 :
-		#		m_sArchive = 0
+
 				
 		'''
 		self.pathcat = pathcatname		# catalogfilename in the cathy's ui
@@ -329,21 +303,6 @@ class CathyCat() :
 			#print(i,self.info[i][0],self.info[i][1])
 			self.writebuf('<l',self.info[i][1])
 			self.writebuf('<d',self.info[i][2])
-
-		#m_paPaths = []
-		#lLen = cls.readbuf('<l')
-		#for l in range(lLen) :
-		#	if l==0 or m_sVersion<=3 :
-		#		m_pszName = cls.readstring()
-		#		#print("m_pszName:",m_pszName,pathcatname)
-		#	if m_sVersion >= 3 :
-		#		m_lFiles = cls.readbuf('<l')
-		#		m_dTotalSize = cls.readbuf('<d')
-		#	m_paPaths.append( (m_lFiles,m_dTotalSize) )	
-		#info = m_paPaths
-		
-		#ptr_files = cls.buffer.tell() # pointer from which to parse elements (file or folders)
-		
 		
 		# files : date, size, parentfolderid, filename
 		# if it's a folder :  date, -thisfolderid, parentfolderid, filename
@@ -355,28 +314,9 @@ class CathyCat() :
 			self.writebuf('<q',el[1]) #size or folderid
 			self.writebuf('H',el[2]) #parentfolderid
 			self.writestring(el[3]) #filename
-		'''
-		m_paFileList = []
-		lLen = cls.readbuf('<l')
-		for l in range(lLen) :
-			elmdate = ctime(cls.readbuf('<L'))
-			if m_sVersion<=6 :
-				# later, won't test for now
-				m_lLength = 0
-			else :
-				# m_lLength = cls.buffer.read(8)
-				m_lLength = cls.readbuf('<q') 
-			#m_sPathName = cls.readbuf('<l')  # in the .cpp I think m_sPathName wants 2 bytes but 4 works for me
-			m_sPathName = cls.readbuf('H')
-			m_pszName = cls.readstring()
-			m_paFileList.append((elmdate,m_lLength,m_sPathName,m_pszName))
-		
-		elm = m_paFileList
-		'''
+
 
 		self.buffer.close()
-
-		#return cls(pathcatname, m_timeDate, m_strDevice, m_strVolume, m_strAlias, m_szVolumeName, m_dwSerialNumber, m_strComment, m_fFreeSize, m_sArchive, info, elm)
 
 
 
@@ -667,8 +607,5 @@ if __name__ == '__main__':
 	else:
 		print("Not enough arguments.\nUse cathy search <term> to search and 'cathy scan <path>' to scan a device.")
 
-	#print(cat.info[0],cat2.info[0])
-	
-	#cat = CathyCat.from_file(os.path.join(pth,"NieuwVolume.caf"))
-	#print(cat.serial)
+
 
