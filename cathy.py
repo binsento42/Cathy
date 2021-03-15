@@ -194,6 +194,89 @@ class CathyCat() :
 		cls.buffer.close()
 
 		return cls(pathcatname, m_timeDate, m_strDevice, m_strVolume, m_strAlias, m_szVolumeName, m_dwSerialNumber, m_strComment, m_fFreeSize, m_sArchive, info, elm)
+
+	@classmethod
+	def fast_from_file(cls, pathcatname):
+		# only reads the header info for freespace etc.
+		
+		try : cls.buffer = open(pathcatname,'rb')
+		except : return
+		
+		# m_sVersion - Check the magic
+		ul = cls.readbuf('<L')
+		if ul > 0 and ul%CathyCat.ulModus == CathyCat.ulMagicBase : 
+			m_sVersion= int(ul/CathyCat.ulModus)
+		else :
+			cls.buffer.close()
+			return
+		
+		if m_sVersion > 2 :
+			m_sVersion = cls.readbuf('h')
+		
+		if m_sVersion > CathyCat.sVersion :
+			return
+		
+		# m_timeDate
+		m_timeDate = ctime(cls.readbuf('<L'))
+		
+		# m_strDevice - Starting version 2 the device is saved
+		if m_sVersion >= 2 : 
+			m_strDevice = cls.readstring()
+	
+		# m_strVolume, m_strAlias > m_szVolumeName
+		m_strVolume = cls.readstring()
+		m_strAlias = cls.readstring()
+	
+		if len(m_strAlias) == 0 :
+			m_szVolumeName = m_strVolume
+		else :
+			m_szVolumeName = m_strAlias
+	
+		# m_dwSerialNumber well, odd..
+		bytesn = cls.buffer.read(4)
+		rawsn = b2a_hex(bytesn).decode().upper()
+		sn = ''
+		while rawsn :
+			chunk = rawsn[-2:]
+			rawsn = rawsn[:-2]
+			sn += chunk
+		m_dwSerialNumber = '%s-%s'%(sn[:4],sn[4:])
+	
+		# m_strComment
+		if m_sVersion >= 4  :
+			m_strComment = cls.readstring()
+		
+		# m_fFreeSize - Starting version 1 the free size was saved
+		if m_sVersion >= 1 : 
+			m_fFreeSize = cls.readbuf('<f') # as megabytes
+		else :
+			m_fFreeSize = -1 # unknow
+			
+		# m_sArchive
+		if m_sVersion >= 6 :
+			m_sArchive = cls.readbuf('h')
+			if m_sArchive == -1 :
+				m_sArchive = 0
+				
+		# folder information : file count, total size
+		m_paPaths = []
+		lLen = cls.readbuf('<l')
+		tcnt = 0
+		for l in range(lLen) :
+			if l==0 or m_sVersion<=3 :
+				m_pszName = cls.readstring()
+			if m_sVersion >= 3 :
+				m_lFiles = cls.readbuf('<l')
+				m_dTotalSize = cls.readbuf('<d')
+			m_paPaths.append( (tcnt, m_lFiles,m_dTotalSize) )
+			tcnt = tcnt + 1
+			
+		info = m_paPaths
+
+		cls.buffer.close()
+
+		return cls(pathcatname, m_timeDate, m_strDevice, m_strVolume, m_strAlias, m_szVolumeName, m_dwSerialNumber, m_strComment, m_fFreeSize, m_sArchive, info, [])
+
 		
 	def write(self, pathcatname):
 		
@@ -491,7 +574,9 @@ def searchFor(patt, searchterm):
 	
 if __name__ == '__main__':
 
-	pth = os.getcwd() #path to .caf files
+	#pth = os.getcwd() #path to .caf files
+	pth = os.path.dirname(os.path.realpath(__file__))
+	print(pth)
 	if len(argv) >2:
 		if "search" in argv[1]:
 			searchFor(pth,argv[2])
@@ -514,6 +599,20 @@ if __name__ == '__main__':
 			cat = CathyCat.from_file(setpath)
 			cat.archive = 1
 			cat.write(setpath)
+
+	elif len(argv) == 2:
+		if "usage" in argv[1]:
+			cafList = makeCafList(pth)
+			lst = []
+			for catname in cafList:
+				pathcatname = os.path.join(pth,catname)
+				cat = CathyCat.fast_from_file(pathcatname)
+				free = int(cat.freesize/1000)
+				used = int(int(cat.info[0][2])/1000/1000/1000)
+				lst.append((free,catname,used))
+			for item in sorted(lst):				
+				print("{0:12}\tFree:\t{1:>5}Gb\t\tUsed:\t{2:>5}Gb\t\tTotal:\t{3:>3.1f}Tb".format(item[1].replace(".caf","")[:12],item[0],item[2],float(item[0]+item[2])/1000))
+
 	else:
 		print("Not enough arguments.\nUse 'python cathy.py search <term>' to search and 'python cathy.py scan <path>' to scan a device.")
 
