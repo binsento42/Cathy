@@ -5,20 +5,20 @@ The cathy.py file has to be in the directory where the .caf files are located. G
 
 Usage:
 
-python cathy.py search #keyword(s)#
+<b>python cathy.py search <i>keyword(s)</i></b>
   
   to search for a specific term in all caf files. Keyword(s) can be different keywords separated by spaces, but then quotes are necessary
-  i.e. python cathy.py search "my photos"
+  (i.e. python cathy.py search "my photos")
   
-python cathy.py scan #path#
+<b>python cathy.py scan <i>path</i></b>
   
-  scans the directory tree from #path# and generates a Cathy compatible file with the volume label name in the cathy.py dir
+  scans the directory tree from #path# and generates a Cathy compatible file with the volume label name in the cathy.py dir. For windows <i>path</i> should be the drive letter (i.e. 'f:'), for linux and osx it is best to use the full mounted path (i.e. /Volumes/NewDisk). Warning: Existing caf files are silently overwritten!
   
-python cathy.py scanarchive #path#
+<b>python cathy.py scanarchive <i>path</i></b>
   
   same as scan, but sets the archive bit. I'm not sure what the original Cathy implementation for the archive bit is,
   but in this python version archive disks are skipped by search
 
-python cathy.py usage
+<b>python cathy.py usage</b>
 
   provides a list of all cataloged disks (caf files) with free/used/total space.
