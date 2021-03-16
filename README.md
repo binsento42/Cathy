@@ -5,22 +5,22 @@ The cathy.py file has to be in the directory where the .caf files are located. G
 
 Usage:
 
-python cathy.py search <keyword>
+python cathy.py search #keyword#(s)#
   
-python3 cathy.py search <keyword>
+python3 cathy.py search #keyword(s)#
   
-  to search for a specific term in all caf files. Searchterm can be different keywords separated by spaces, but then quotes are necessary
+  to search for a specific term in all caf files. Keyword(s) can be different keywords separated by spaces, but then quotes are necessary
   i.e. python cathy.py search "my photos"
   
-python cathy.py scan <path>
+python cathy.py scan #path#
   
-python3 cathy.py scan <path>
+python3 cathy.py scan #path#
   
   scans the directory tree from <path> and generates a Cathy compatible file with the volume label name in the cathy.py dir
   
-python cathy.py scanarchive <path>
+python cathy.py scanarchive #path#
   
-python3 cathy.py scanarchive <path>
+python3 cathy.py scanarchive #path#
   
   same as scan, but sets the archive bit. I'm not sure what the original Cathy implementation for the archive bit is,
   but in this python version archive disks are not included in the search, since
