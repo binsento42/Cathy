@@ -17,7 +17,7 @@ python cathy.py scan #path#
 python cathy.py scanarchive #path#
   
   same as scan, but sets the archive bit. I'm not sure what the original Cathy implementation for the archive bit is,
-  but in this python version archive disks are not included in the search, since
+  but in this python version archive disks are not skipped by the search
 
 python cathy.py usage
 
