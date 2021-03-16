@@ -1,7 +1,7 @@
 # Cathy-python
 Cross-platform python implementation of Robert Vasicek's Win-only popular Cathy disk catalog tool. Mainly intended on providing osx and linux support, since the original already works for Windows, but Windows is also supported. No GUI, mainly intended for simple cli search of existing .caf files and also automatic scanning of (backup) disks. The code should work for python 2 as well as 3.
 
-The cathy.py file has to be in the directory where the .caf files are located. Generated .caf files are put in the same directory as the python file.
+The cathy.py file has to be in the directory where the .caf files are located. Generated .caf files are put in the same directory as the python file. To avoid a lot of troublesome dependencies some infoz are gathered via shell commands. In some configurations this might not work at all and it might stop working with new os updates.
 
 Usage:
 
