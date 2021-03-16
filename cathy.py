@@ -594,14 +594,14 @@ if __name__ == '__main__':
 
 	#pth = os.getcwd() #path to .caf files
 	pth = os.path.dirname(os.path.realpath(__file__))
-	print(pth)
+	#print(pth)
 	if len(argv) >2:
 		if "search" in argv[1]:
 			searchFor(pth,argv[2])
 		
 		if "scan" in argv[1]:
 			scanpath =argv[2]
-			if scanpath[-1] == '/' or scanpath[-1] == '\':
+			if scanpath[-1] == '/' or scanpath[-1] == '\\':
 				scanpath = scanpath[:-1]
 			print("Scanning...")
 			cat = CathyCat.scan(scanpath)
