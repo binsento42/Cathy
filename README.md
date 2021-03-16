@@ -12,7 +12,7 @@ python cathy.py search #keyword(s)#
   
 python cathy.py scan #path#
   
-  scans the directory tree from <path> and generates a Cathy compatible file with the volume label name in the cathy.py dir
+  scans the directory tree from #path# and generates a Cathy compatible file with the volume label name in the cathy.py dir
   
 python cathy.py scanarchive #path#
   
