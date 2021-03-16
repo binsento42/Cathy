@@ -454,7 +454,8 @@ class CathyCat() :
 			end = output.find('\n',start)
 			ser = output[end-8:end-4]+"-"+output[end-4:end]
 		elif platform == "win32":
-		    pass
+			output=subprocess.check_output(['vol',start_path],shell=True).decode().strip()
+			ser = output[-9:]
 		return ser
 
 	@classmethod
@@ -469,7 +470,24 @@ class CathyCat() :
 			end = output.find('\n',start)
 			ser = output[start:end].strip()
 		elif platform == "win32":
-		    pass
+			import ctypes
+			kernel32 = ctypes.windll.kernel32
+			volumeNameBuffer = ctypes.create_unicode_buffer(1024)
+			fileSystemNameBuffer = ctypes.create_unicode_buffer(1024)
+			serial_number = None
+			max_component_length = None
+			file_system_flags = None
+			rc = kernel32.GetVolumeInformationW(
+			    ctypes.c_wchar_p(start_path),
+			    volumeNameBuffer,
+			    ctypes.sizeof(volumeNameBuffer),
+			    serial_number,
+			    max_component_length,
+			    file_system_flags,
+			    fileSystemNameBuffer,
+			    ctypes.sizeof(fileSystemNameBuffer)
+			)
+			ser = volumeNameBuffer.value
 		return ser
 
 	@classmethod
@@ -489,7 +507,7 @@ class CathyCat() :
 		elif platform == "win32":
 			import ctypes
 			free_bytes = ctypes.c_ulonglong(0)
-			ctypes.windll.kernel32.GetDiskFreeSpaceExW(ctypes.c_wchar_p(u'c:\\'), None, None, ctypes.pointer(free_bytes))
+			ctypes.windll.kernel32.GetDiskFreeSpaceExW(ctypes.c_wchar_p(start_path), None, None, ctypes.pointer(free_bytes))
 			ser = float(free_bytes.value)/1024
 
 		return ser/1024
@@ -583,7 +601,7 @@ if __name__ == '__main__':
 		
 		if "scan" in argv[1]:
 			scanpath =argv[2]
-			if scanpath[-1] == '/':
+			if scanpath[-1] == '/' or scanpath[-1] == '\':
 				scanpath = scanpath[:-1]
 			print("Scanning...")
 			cat = CathyCat.scan(scanpath)
