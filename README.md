@@ -7,12 +7,12 @@ Usage:
 
 <b>python cathy.py search <i>keyword(s)</i></b>
   
-  to search for a specific term in all caf files. Keyword(s) can be different keywords separated by spaces, but then quotes are necessary
-  (i.e. python cathy.py search "my photos")
+  to search for a specific term in all caf files. Keyword(s) can be multiple keywords separated by spaces, but then quotes are necessary
+  (i.e. python cathy.py search "my photos"). Search only shows match if a filename contains all the keywords (logical AND).
   
 <b>python cathy.py scan <i>path</i></b>
   
-  scans the directory tree from #path# and generates a Cathy compatible file with the volume label name in the cathy.py dir (not sure what happens if the disk has no label). For windows <i>path</i> should be the drive letter (i.e. 'f:'), for linux and osx it is best to use the full mounted path (i.e. /Volumes/NewDisk). Warning: Existing caf files are silently overwritten!
+  scans the directory tree from <i>path</i> and generates a Cathy compatible file with the volume label name in the cathy.py dir (not sure what happens if the disk has no label). For windows <i>path</i> should be the drive letter (i.e. 'f:'), for linux and osx it is best to use the full mounted path (i.e. /Volumes/NewDisk or /media/usb). Warning: Existing caf files are silently overwritten!
   
 <b>python cathy.py scanarchive <i>path</i></b>
   
