@@ -16,9 +16,9 @@ Usage:
   
 <b>python cathy.py scanarchive <i>path</i></b>
   
-  same as scan, but sets the archive bit. I'm not sure what the original Cathy implementation for the archive bit is,
+  same as scan, but sets the archive flag. I'm not sure what the original Cathy implementation for the archive flag is,
   but in this python version archive disks are skipped by search
 
 <b>python cathy.py usage</b>
 
-  provides a list of all cataloged disks (caf files) with free/used/total space.
+  provides a list of all cataloged disks (caf files) with their free/used/total space.
