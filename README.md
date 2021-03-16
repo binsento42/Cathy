@@ -12,7 +12,7 @@ Usage:
   
 <b>python cathy.py scan <i>path</i></b>
   
-  scans the directory tree from #path# and generates a Cathy compatible file with the volume label name in the cathy.py dir. For windows <i>path</i> should be the drive letter (i.e. 'f:'), for linux and osx it is best to use the full mounted path (i.e. /Volumes/NewDisk). Warning: Existing caf files are silently overwritten!
+  scans the directory tree from #path# and generates a Cathy compatible file with the volume label name in the cathy.py dir (not sure what happens if the disk has no label). For windows <i>path</i> should be the drive letter (i.e. 'f:'), for linux and osx it is best to use the full mounted path (i.e. /Volumes/NewDisk). Warning: Existing caf files are silently overwritten!
   
 <b>python cathy.py scanarchive <i>path</i></b>
   
