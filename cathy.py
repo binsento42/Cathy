@@ -96,7 +96,7 @@ class CathyCat() :
 		self.elm = elm
 
 	@classmethod
-	def from_file(cls, pathcatname):
+	def from_file(cls, pathcatname, no_elm = False):
 		
 		try : cls.buffer = open(pathcatname,'rb')
 		except : return
@@ -172,6 +172,10 @@ class CathyCat() :
 			
 		info = m_paPaths
 				
+		if no_elm:
+			cls.buffer.close()
+			return cls(pathcatname, m_timeDate, m_strDevice, m_strVolume, m_strAlias, m_szVolumeName, m_dwSerialNumber, m_strComment, m_fFreeSize, m_sArchive, info, [])
+
 		# files : date, size, parentfolderid, filename
 		# if it's a folder :  date, -thisfolderid, parentfolderid, filename
 		m_paFileList = []
@@ -197,85 +201,8 @@ class CathyCat() :
 
 	@classmethod
 	def fast_from_file(cls, pathcatname):
-		# only reads the header info for freespace etc.
-		
-		try : cls.buffer = open(pathcatname,'rb')
-		except : return
-		
-		# m_sVersion - Check the magic
-		ul = cls.readbuf('<L')
-		if ul > 0 and ul%CathyCat.ulModus == CathyCat.ulMagicBase : 
-			m_sVersion= int(ul/CathyCat.ulModus)
-		else :
-			cls.buffer.close()
-			return
-		
-		if m_sVersion > 2 :
-			m_sVersion = cls.readbuf('h')
-		
-		if m_sVersion > CathyCat.sVersion :
-			return
-		
-		# m_timeDate
-		m_timeDate = ctime(cls.readbuf('<L'))
-		
-		# m_strDevice - Starting version 2 the device is saved
-		if m_sVersion >= 2 : 
-			m_strDevice = cls.readstring()
-	
-		# m_strVolume, m_strAlias > m_szVolumeName
-		m_strVolume = cls.readstring()
-		m_strAlias = cls.readstring()
-	
-		if len(m_strAlias) == 0 :
-			m_szVolumeName = m_strVolume
-		else :
-			m_szVolumeName = m_strAlias
-	
-		# m_dwSerialNumber well, odd..
-		bytesn = cls.buffer.read(4)
-		rawsn = b2a_hex(bytesn).decode().upper()
-		sn = ''
-		while rawsn :
-			chunk = rawsn[-2:]
-			rawsn = rawsn[:-2]
-			sn += chunk
-		m_dwSerialNumber = '%s-%s'%(sn[:4],sn[4:])
-	
-		# m_strComment
-		if m_sVersion >= 4  :
-			m_strComment = cls.readstring()
-		
-		# m_fFreeSize - Starting version 1 the free size was saved
-		if m_sVersion >= 1 : 
-			m_fFreeSize = cls.readbuf('<f') # as megabytes
-		else :
-			m_fFreeSize = -1 # unknow
-			
-		# m_sArchive
-		if m_sVersion >= 6 :
-			m_sArchive = cls.readbuf('h')
-			if m_sArchive == -1 :
-				m_sArchive = 0
-				
-		# folder information : file count, total size
-		m_paPaths = []
-		lLen = cls.readbuf('<l')
-		tcnt = 0
-		for l in range(lLen) :
-			if l==0 or m_sVersion<=3 :
-				m_pszName = cls.readstring()
-			if m_sVersion >= 3 :
-				m_lFiles = cls.readbuf('<l')
-				m_dTotalSize = cls.readbuf('<d')
-			m_paPaths.append( (tcnt, m_lFiles,m_dTotalSize) )
-			tcnt = tcnt + 1
-			
-		info = m_paPaths
-
-		cls.buffer.close()
-
-		return cls(pathcatname, m_timeDate, m_strDevice, m_strVolume, m_strAlias, m_szVolumeName, m_dwSerialNumber, m_strComment, m_fFreeSize, m_sArchive, info, [])
+		# only reads the header info for freespace, archive bit etc.
+		return cls.from_file(pathcatname, no_elm=True)
 
 		
 	def write(self, pathcatname):
@@ -335,7 +262,8 @@ class CathyCat() :
 		returns an absolute path to the main directory
 		handled by this .cat file
 		'''
-		return self.device + self.volume #[2:-1] # don't know why 
+		#return self.device + self.volume #[2:-1] # don't know why 
+		return self.volume
 
 	def path(self,elmid) :
 		'''
@@ -364,6 +292,7 @@ class CathyCat() :
 				else :
 					print('error in parenting..')
 		pths.reverse()
+		#print(pths)
 		return ospath.sep.join(pths)
 
 	def parentof(self,elmid) :
@@ -575,10 +504,11 @@ def searchFor(patt, searchterm):
 	cafList = makeCafList(pth)
 	for catname in cafList:
 		pathcatname = os.path.join(pth,catname)
-		cat = CathyCat.from_file(pathcatname)
+		cat = CathyCat.fast_from_file(pathcatname)
 		if cat.archive:
 			print("Skipping",catname,"for search because of archive bit")
 		else:
+			cat = CathyCat.from_file(pathcatname)
 			print(catname)
 			for i in range(len(cat.elm)):
 				FOUND = True
@@ -587,7 +517,7 @@ def searchFor(patt, searchterm):
 						FOUND = False
 						break;
 				if FOUND:
-					print("Match:",cat.path(i)[3:])
+					print("Match:",cat.path(i))
 
 	
 if __name__ == '__main__':
@@ -601,9 +531,10 @@ if __name__ == '__main__':
 		
 		if "scan" in argv[1]:
 			scanpath =argv[2]
-			if scanpath[-1] == '/' or scanpath[-1] == '\\':
-				scanpath = scanpath[:-1]
-			print("Scanning...")
+			scanpath = os.path.normpath(scanpath)
+			#if scanpath[-1] == '/' or scanpath[-1] == '\\':
+			#	scanpath = scanpath[:-1]
+			print("Scanning:",scanpath,"...")
 			cat = CathyCat.scan(scanpath)
 			if "archive" in argv[1]:
 				print("Setting archive bit!")
