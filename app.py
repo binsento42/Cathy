@@ -43,27 +43,29 @@ def index():
 	return render_template('index.html', title='DISKS', files=[(x[0],'{0:,}'.format(x[1]),'{0:,}'.format(x[2]),'{0:,.1f}'.format(x[3]), x[4]) for x in disklist])
 
 @app.route("/inbrowse/<path>/<dir_id>")
-def inbrowse(path="",dir_id="0"):	
-	global currentcat, lastlabel, lastreverse
+def inbrowse(path="",dir_id="0"):
+	#global currentcat
 	sort = request.args.get('sort')
+	cid = int(dir_id)
+
+	childs = mySort(currentcat.getChildren(cid) ,sort,{ 'name':0, 'size':1})
+
+	return render_template('inbrowse.html', title=path, dir_id=dir_id, files=childs)
+
+@app.route("/browse/<path>/<dir_id>")
+def browse(path="",dir_id="0"):	
+	global currentcat, lastlabel
+	cid = int(dir_id)
 	if path != lastlabel:
 		print("reading file..")
 		caffile = os.path.join(cafpath,path+".caf")
 		currentcat = cathy.CathyCat.from_file(caffile)
 		lastlabel = path
-	cid = int(dir_id)
 	if cid > 0:
 		dirname = currentcat.volume + ' - ' + currentcat.elm[currentcat.lookup_dir_id(cid)][3]
 	else:
 		dirname = currentcat.volume
-
-	childs = mySort(currentcat.getChildren(cid) ,sort,{ 'name':0, 'size':1})
-
-	return render_template('inbrowse.html', title=path, dir_id=dir_id, dirname=dirname, files=childs)
-
-@app.route("/browse/<path>/<dir_id>")
-def browse(path="",dir_id="0"):	
-	return render_template('browse.html', title=path, dirid=dir_id)
+	return render_template('browse.html', title=path, dirname=dirname, dirid=dir_id)
 
 
 @app.route("/search", methods=["GET", "POST"])
@@ -81,7 +83,7 @@ def search():
 	return redirect('/')
 
 def main():
-	app.run(debug=False)
+	app.run(debug=True)
 
 if __name__ == "__main__":
 	if len(argv) != 2:

@@ -5,6 +5,19 @@
     </head>
     <script src="{{url_for('static', filename='functions.9e84e97f4b6ae3b3d092f1d912226979.js')}}"></script>
     <script>
+        function ChangeUrl() {
+            console.log("changeurl");
+            if (typeof (history.pushState) != "undefined") {
+                var obj = { Title: "Home", Url: "localhost:5000" };
+                history.pushState(obj, obj.Title, obj.Url);
+            } else {
+                alert("Browser does not support HTML5.");
+            }
+        }
+        function Home() {
+            var newurl = window.location.protocol + "//" + window.location.host ;
+            window.history.pushState({path:newurl},'',newurl);        }
+
         function myFunction() {
           // Get the checkbox
           var checkBox = document.getElementById("myCheck");
@@ -32,11 +45,13 @@
             }
           }
         }
+
         function boxtest() {
             console.log("boxtest")
         }
+
     </script>
-    <body>
+    <body onload="javascript:Home()">
         <h1>Disk List</h1><hl>
             <form action="/search" method="POST">
               <div class="form-group">
