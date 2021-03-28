@@ -31,4 +31,4 @@ A first Python Flask browser implementation is now also provided. You'll need fl
 Then run the server with 'python3 app.py <i>path-to-caf-files</i>'
 
 With your browser go to 'localhost:5000' and browse through your offline disks (caf files) and directories and perform a search.
-
+Scan is not implemented in the browser version, you'll have to scan disks using CLI.
