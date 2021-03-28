@@ -1,10 +1,24 @@
+* {
+  text-align: center;
+  color: mediumblue;
+  font-family: "Monaco", "Lucida Console", "Courier New", monospace;
+}
+
+body {
+  background-color: skyblue;
+}
+
+table {
+  margin-left: auto;
+  margin-right: auto;
+}
 
 tr.archive {
 	display: none;
 }
 
 tr:hover {
-background-color: lightgray;
+background-color: white;
 }
 
 td {
@@ -13,4 +27,9 @@ td {
 
 td.left {
 	text-align: left;  
+}
+
+th, td {
+  padding-right: 25px;
+  padding-left: 25px;
 }
