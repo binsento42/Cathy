@@ -5,19 +5,6 @@
     </head>
     <script src="{{url_for('static', filename='functions.9e84e97f4b6ae3b3d092f1d912226979.js')}}"></script>
     <script>
-        function ChangeUrl() {
-            console.log("changeurl");
-            if (typeof (history.pushState) != "undefined") {
-                var obj = { Title: "Home", Url: "localhost:5000" };
-                history.pushState(obj, obj.Title, obj.Url);
-            } else {
-                alert("Browser does not support HTML5.");
-            }
-        }
-        function Home() {
-            var newurl = window.location.protocol + "//" + window.location.host ;
-            window.history.pushState({path:newurl},'',newurl);        }
-
         function myFunction() {
           // Get the checkbox
           var checkBox = document.getElementById("myCheck");
@@ -51,18 +38,18 @@
         }
 
     </script>
-    <body onload="javascript:Home()">
+    <body>
         <h1>Disk List</h1><hl>
             <form action="/search" method="POST">
               <div class="form-group">
-                <h3><label>&#128269;</label>
+                <h4><label>&#128269;</label>
                 <input type="text" class="form-control" id="search" name="search" onclick="boxtest()" placeholder="Enter search term">
                 <input type="checkbox" id="myCheck" onclick="myFunction()"> Search Archives
-                </h3>
+                </h4>
               </div>
             </form>
 
-            <table id="myTable" style=display:block>
+            <table id="myTable">
                 <tr>
                 <th onclick="sortTable(0)">Name</th>
                 <th onclick="sortTable(1)">Used</th>

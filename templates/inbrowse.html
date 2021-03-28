@@ -10,9 +10,9 @@
         {% for file in files: %}
         <tr>
         {% if file[2] != "" : %}
-	        <td class="left"><a href="/inbrowse/{{ title }}/{{ file[2] }}">{{ file[0] }}</td><td align=right>{{ file[1] }}</td>
+	        <td class="left"><a href="/inbrowse/{{ title }}/{{ file[2] }}">{{ file[0] }}</td><td align=right>{{ file[1] }} kB</td>
 	    {% else %}
-	        <td class="left">{{ file[0] }}</td><td align=right>{{ file[1] }}</td>
+	        <td class="left">{{ file[0] }}</td><td align=right>{{ file[1] }} kB</td>
 	    {% endif %} 
 		</tr>
 	{% endfor %}
