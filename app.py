@@ -82,7 +82,7 @@ def search():
 	return redirect('/')
 
 def main():
-	app.run(debug=True)
+	app.run(debug=False)
 
 if __name__ == "__main__":
 	if len(argv) != 2:
