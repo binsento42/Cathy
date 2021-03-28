@@ -23,11 +23,11 @@ Usage:
 
   provides a list of all cataloged disks (caf files) with their free/used/total space.
 
-#Browser GUI based on Flask
+<b>Browser GUI based on Flask</b>
 
 A first Python Flask browser implementation is now also provided. You'll need flask. Do 'pip install flask'
 
-Then run the server with 'python3 app.py <path-to-caf-files>'
+Then run the server with 'python3 app.py <i>path-to-caf-files</i>'
 
 With your browser go to 'localhost:5000' and browse and search your caf files. In most windows it is possible to change the sort order.
 
