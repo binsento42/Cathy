@@ -19,7 +19,7 @@ cat.archive
 		
 cat.elm will contain every element (folder name ot filename)
 cat.elm[69] returns a tuple with (date, size, parent folder id, filename)
-cat.info[folder id] returns a tuple with folder informations
+cat.info[folder id] returns a tuple (id, filecount, dirsize)
 
 # Vincent continues with Jerome's code
 2021/03/09	All unpack formats fixed for endianness so the Python code will run on mac and linux systems
@@ -315,6 +315,16 @@ class CathyCat() :
 		for i,elm in enumerate(self.elm) :
 			if elm[1] == -pn : return elm[3]
 
+	def lookup_dir_id(self, elmid):
+		FOUND = False
+		tcnt = 0
+		while not FOUND:
+			if self.elm[tcnt][1] == -elmid:
+				FOUND = True
+			else:
+				tcnt = tcnt + 1
+		return tcnt
+
 	def lookup(self,elmname) :
 		'''	
 		get an internal id from a file or folder name
@@ -487,6 +497,16 @@ class CathyCat() :
 
 		return t_cat
 
+	def getChildren(self,id):
+		children = []
+		for i in range(len(self.elm)):
+			if self.elm[i][2] == id:
+				if self.elm[i][1] < 0:
+					children.append((self.elm[i][3],int(self.info[-self.elm[i][1]][2]),str(-self.elm[i][1])))
+				else:
+					children.append((self.elm[i][3],int(self.elm[i][1]),""))
+		return children
+
 # functions that use CathyCat
 
 def makeCafList(path):
@@ -498,14 +518,15 @@ def makeCafList(path):
 				lst.append(fil)
 	return(lst)
 
-def searchFor(patt, searchterm):
+def searchFor(pth, searchterm, archive=False):
 	searchlist = searchterm.lower().split(' ')
+	matches = []
 	# checks all .caf files in patt for a match with alls terms in searchlist
 	cafList = makeCafList(pth)
 	for catname in cafList:
 		pathcatname = os.path.join(pth,catname)
 		cat = CathyCat.fast_from_file(pathcatname)
-		if cat.archive:
+		if cat.archive and not archive:
 			print("Skipping",catname,"for search because of archive bit")
 		else:
 			cat = CathyCat.from_file(pathcatname)
@@ -518,6 +539,11 @@ def searchFor(patt, searchterm):
 						break;
 				if FOUND:
 					print("Match:",cat.path(i))
+					if cat.elm[i][1] < 0:
+						matches.append((cat.path(i),int(cat.info[-cat.elm[i][1]][2])))
+					else:
+						matches.append((cat.path(i),cat.elm[i][1]))
+	return matches
 
 	
 if __name__ == '__main__':
@@ -561,7 +587,7 @@ if __name__ == '__main__':
 				lst.append((free,catname,used))
 			for item in sorted(lst):				
 				print("{0:12}\tFree:\t{1:>5}Gb\t\tUsed:\t{2:>5}Gb\t\tTotal:\t{3:>3.1f}Tb".format(item[1].replace(".caf","")[:12],item[0],item[2],float(item[0]+item[2])/1000))
-
+				
 	else:
 		print("Not enough arguments.\nUse 'python cathy.py search <term>' to search and 'python cathy.py scan <path>' to scan a device.")
 
