@@ -36,7 +36,6 @@ def index():
 			free = int(cat.freesize/1000)
 			used = int(int(cat.info[0][2])/1000/1000/1000)
 			total = round(float(free+used)/500)*.5
-			print(fil,cat.archive)
 			disklist.append((fil,used,free,total,cat.archive))
 	else:
 		disklist = mySort(disklist,sort,{ 'name':0, 'used':1, 'free':2, 'total':3 })
