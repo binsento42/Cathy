@@ -7,7 +7,7 @@ cafpath = ""
 app = Flask(__name__)
 
 disklist = None
-lastreverse = False
+lastreverse = True
 currentcat = None
 lastlabel = None
 
@@ -37,6 +37,7 @@ def index():
 			used = int(int(cat.info[0][2])/1000/1000/1000)
 			total = round(float(free+used)/500)*.5
 			disklist.append((fil,used,free,total,cat.archive))
+		disklist = mySort(disklist,'name',{ 'name':0, 'used':1, 'free':2, 'total':3 })
 	else:
 		disklist = mySort(disklist,sort,{ 'name':0, 'used':1, 'free':2, 'total':3 })
 
@@ -50,7 +51,7 @@ def inbrowse(path="",dir_id="0"):
 
 	childs = mySort(currentcat.getChildren(cid) ,sort,{ 'name':0, 'size':1})
 
-	return render_template('inbrowse.html', title=path, dir_id=dir_id, files=childs)
+	return render_template('inbrowse.html', title=path, dir_id=dir_id, files=[(x[0],'{0:,.0f}'.format(int(x[1])/1000),x[2]) for x in childs])
 
 @app.route("/browse/<path>/<dir_id>")
 def browse(path="",dir_id="0"):	
