@@ -1,0 +1,75 @@
+<html>
+    <head>
+        <link rel="stylesheet" href='/static/main.css' />
+        <title>{{ title }}</title>
+    </head>
+    <script src="{{url_for('static', filename='functions.9e84e97f4b6ae3b3d092f1d912226979.js')}}"></script>
+    <script>
+        function myFunction() {
+          // Get the checkbox
+          var checkBox = document.getElementById("myCheck");
+          //console.log(text)
+
+          if (checkBox.checked == true){
+            // Get the output text
+            var text = document.getElementsByClassName("archive");
+            //console.log(text)
+            //console.log(text.length)
+            count = text.length
+            for(i=count-1;i>=0;i--)
+            {
+                console.log(text[i])
+                text[i].className="noarchive"
+            }
+          } else {
+            // Get the output text
+            var text = document.getElementsByClassName("noarchive");
+            //console.log(text)
+            count = text.length
+            for(i=count-1;i>=0;i--)
+            {
+                text[i].className="archive"
+            }
+          }
+        }
+        function boxtest() {
+            console.log("boxtest")
+        }
+    </script>
+    <body>
+        <h1>Disk List</h1><hl>
+            <form action="/search" method="POST">
+              <div class="form-group">
+                <h3><label>&#128269;</label>
+                <input type="text" class="form-control" id="search" name="search" onclick="boxtest()" placeholder="Enter search term">
+                <input type="checkbox" id="myCheck" onclick="myFunction()"> Search Archives
+                </h3>
+              </div>
+            </form>
+
+            <table id="myTable" style=display:block>
+                <tr>
+                <th onclick="sortTable(0)">Name</th>
+                <th onclick="sortTable(1)">Used</th>
+                <th onclick="sortTable(2)">Free</th>
+                <th onclick="sortTable(3)">Total</th>
+                </tr>
+
+                {% for file in files: %}
+                {% if file[4] == 1: %}
+                    <tr class="archive">
+                {% else %}
+                    <tr>
+                {% endif %}
+                        <td class="left"><a href="/browse/{{ file[0] }}/0">{{ file[0] }}</td>
+                        <td>{{ file[1] }} Gb</td>
+                        <td>{{ file[2] }} Gb</td>
+                        <td>{{ file[3] }} Tb</td>
+                    </tr>
+ 
+        	    {% endfor %}
+            </table>
+
+
+    </body>
+</html>

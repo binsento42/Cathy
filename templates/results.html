@@ -1,0 +1,19 @@
+<html>
+    <head>
+        <title>{{ title }}</title>
+        <link rel="stylesheet" href='/static/main.css' />        
+    </head>
+    <body>
+    	<h1>
+            <a href="/">&#8962</a>
+    		Search Results for: {{ search }}
+    	</h1><hl>
+    	<table>
+            <th>Name</th><th>Size</th>
+        {% for result in results: %}
+        <tr>
+	        <td class="left">{{ result[0] }}</td><td align=right>{{ result[1] }} kB</td>
+		</tr>
+	{% endfor %}
+    </body>
+</html>

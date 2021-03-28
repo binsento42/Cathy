@@ -1,0 +1,30 @@
+<html>
+    <head>
+        <title>{{ title }}</title>
+        <link rel="stylesheet" href='/static/main.css' />
+    </head>
+    <body>
+    	<h1><a href="/">&#8962</a>
+    		<!--
+    		{% if dirname == "" %}
+    		{{ title }}
+    		{% else %}
+    		{{ title }} - {{ dirname }}
+    		{% endif %}
+    	-->
+    	{{ dirname }}
+    	</h1><hl>
+    	<table>
+    		<th><a href="#" onclick=parent.setIFrameSrc("?sort=name")>Name</th>
+    		<th><a href="#" onclick=parent.setIFrameSrc("?sort=size")>Size</th>
+        {% for file in files: %}
+        <tr>
+        {% if file[2] != "" : %}
+	        <td class="left"><a href="/browse/{{ title }}/{{ file[2] }}">{{ file[0] }}</td><td align=right>{{ file[1] }}</td>
+	    {% else %}
+	        <td class="left">{{ file[0] }}</td><td align=right>{{ file[1] }}</td>
+	    {% endif %} 
+		</tr>
+	{% endfor %}
+    </body>
+</html>

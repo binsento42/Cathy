@@ -1,0 +1,16 @@
+
+tr.archive {
+	display: none;
+}
+
+tr:hover {
+background-color: lightgray;
+}
+
+td {
+	text-align: right;  
+}
+
+td.left {
+	text-align: left;  
+}
