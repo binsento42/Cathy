@@ -1,6 +1,7 @@
 # Cathy-python
 Cross-platform python implementation of Robert Vasicek's Win-only popular Cathy disk catalog tool (http://rva.mtg.sk/). Mainly intended for providing osx and linux support, since the original already works for Windows, but Windows is also supported. No GUI, mainly intended for simple cli search of existing .caf files and also automatic scanning of (backup) disks. The code should work for python 2 as well as 3.
 
+For CLI operation only the cathy.py file is needed. The other stuff is for the Flask browser GUI version.
 The cathy.py file has to be in the directory where the .caf files are located. Generated .caf files are put in the same directory as the python file. To avoid a lot of troublesome dependencies some infoz are gathered via shell commands. In some configurations this might not work at all and it might stop working with new os updates.
 
 Usage:
@@ -29,7 +30,5 @@ A first Python Flask browser implementation is now also provided. You'll need fl
 
 Then run the server with 'python3 app.py <i>path-to-caf-files</i>'
 
-With your browser go to 'localhost:5000' and browse and search your caf files. In most windows it is possible to change the sort order.
-
-
+With your browser go to 'localhost:5000' and browse through your offline disks (caf files) and directories and perform a search.
 
