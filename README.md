@@ -22,3 +22,12 @@ Usage:
 <b>python cathy.py usage</b>
 
   provides a list of all cataloged disks (caf files) with their free/used/total space.
+
+A first Python Flask browser implementation is now also provided. You'll need flask. Do 'pip install flask'
+
+Then run the server with 'python3 app.py <path-to-caf-files>'
+
+With your browser go to 'localhost:5000' and browse and search your caf files. In most windows it is possible to change the sort order.
+
+
+
