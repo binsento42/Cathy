@@ -49,9 +49,14 @@ def inbrowse(path="",dir_id="0"):
 	sort = request.args.get('sort')
 	cid = int(dir_id)
 
+	if cid != 0:
+		pdir = str(currentcat.elm[currentcat.lookup_dir_id(cid)][2])
+	else:
+		pdir = "root"
+
 	childs = mySort(currentcat.getChildren(cid) ,sort,{ 'name':0, 'size':1})
 
-	return render_template('inbrowse.html', title=path, dir_id=dir_id, files=[(x[0],'{0:,.0f}'.format(int(x[1])/1000),x[2]) for x in childs])
+	return render_template('inbrowse.html', title=path, dir_id=dir_id, pdir=pdir, files=[(x[0],'{0:,.0f}'.format(int(x[1])/1000),x[2]) for x in childs])
 
 @app.route("/browse/<path>/<dir_id>")
 def browse(path="",dir_id="0"):	

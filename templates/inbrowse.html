@@ -7,8 +7,13 @@
     	<table>
     		<th><a href="#" onclick=parent.setIFrameSrc("?sort=name")>Name</th>
     		<th><a href="#" onclick=parent.setIFrameSrc("?sort=size")>Size</th>
+        {% if pdir != "root": %}
+        <tr><td class="left"><a href="/inbrowse/{{ title }}/{{ pdir }}">..</td></tr>
+        {% else %}
+        <tr><td class="left"><a href="/">..</td></tr>
+        {% endif %}
         {% for file in files: %}
-        <tr>
+        <tr>            
         {% if file[2] != "" : %}
 	        <td class="left"><a href="/inbrowse/{{ title }}/{{ file[2] }}">{{ file[0] }}</td><td align=right>{{ file[1] }} kB</td>
 	    {% else %}
