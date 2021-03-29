@@ -58,8 +58,8 @@ def inbrowse(path="",dir_id="0"):
 
 	return render_template('inbrowse.html', title=path, dir_id=dir_id, pdir=pdir, files=[(x[0],'{0:,.0f}'.format(int(x[1])/1000),x[2]) for x in childs])
 
-@app.route("/browse/<path>/<dir_id>")
-def browse(path="",dir_id="0"):	
+@app.route("/oldbrowse/<path>/<dir_id>")
+def oldbrowse(path="",dir_id="0"):	
 	global currentcat, lastlabel
 	cid = int(dir_id)
 	if path != lastlabel:
@@ -73,9 +73,38 @@ def browse(path="",dir_id="0"):
 		dirname = currentcat.volume
 	return render_template('browse.html', title=path, dirname=dirname, dirid=dir_id)
 
+@app.route("/browse/<path>/<dir_id>")
+def browse(path="",dir_id="0"):	
+	global currentcat, lastlabel
+	sort = request.args.get('sort')
+	cid = int(dir_id)
+	if path != lastlabel:
+		print("reading file..")
+		caffile = os.path.join(cafpath,path+".caf")
+		currentcat = cathy.CathyCat.from_file(caffile)
+		lastlabel = path
+	if cid > 0:
+		dirname = currentcat.volume + ' - ' + currentcat.elm[currentcat.lookup_dir_id(cid)][3]
+	else:
+		dirname = currentcat.volume
+	if cid != 0:
+		pdir = str(currentcat.elm[currentcat.lookup_dir_id(cid)][2])
+	else:
+		pdir = "root"
 
+	childs = mySort(currentcat.getChildren(cid) ,sort,{ 'name':0, 'size':1})
+
+	return render_template('browse.html', dirname=dirname, pdir=pdir, files=[(x[0],'{0:,.0f}'.format(int(x[1])/1000),x[2]) for x in childs])
+
+
+
+@app.route("/disksearch/<path>", methods=["GET", "POST"])
 @app.route("/search", methods=["GET", "POST"])
-def search():
+def search(path=""):
+	if path != "":
+		tpath = os.path.join(cafpath,path+'.caf')
+	else:
+		tpath = cafpath
 	if request.method == "POST":
 		req = request.form
 		if request.form.get("archive"):
@@ -83,7 +112,7 @@ def search():
 		else:
 			archive = False
 
-		response = cathy.searchFor(cafpath,req['search'],archive)
+		response = cathy.searchFor(tpath,req['search'],archive)
 		return render_template('results.html', title="results", search=req['search'], results=[(x[0],'{0:,}'.format(int(x[1]/1000))) for x in response])
 
 	return redirect('/')

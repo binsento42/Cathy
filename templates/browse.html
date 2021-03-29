@@ -1,17 +1,38 @@
 <html>
 <head>
 	<link rel="stylesheet" href='/static/main.css' />
+	<title>{{ dirname }}</title>
 </head>
-    <script>
-    function setIFrameSrc(url) {
-        console.log("setiframe");
-
-        var iframe = document.getElementById("42");
-		iframe.contentWindow.location.replace(url); 
-    }
-    </script>
     <body>
-    	<h1><a href="/"> &#8962</a> {{ dirname }}</h1><hl>
-	<iframe id="42" frameborder=0 width="100%" height="100%" src="/inbrowse/{{ title }}/{{ dirid }}" title="Inner browse"></iframe>
+    	<h1><a href="/"> &#8962</a> {{ dirname }}
+    		{% if pdir == "root": %}
+    	            <form action="/disksearch/{{ dirname }}" method="POST">
+                <div class="form-group">
+                    <input type="text" class="form-control" id="search" name="search" placeholder="Enter search term">
+                </div>
+            </form>
+            {% endif %}
+             
+		</h1><hl>
+    	<table>
+    		<th class="left"><table><tr><td class="left"><a href="#" onclick=window.location.replace("?sort=name")>Name</td>
+                <td>
+                </td></tr></table></th>
+    		<th><a href="#" onclick=window.location.replace("?sort=size")>Size</th>
+        {% if pdir != "root": %}
+        <tr><td class="left"><a href="/browse/{{ title }}/{{ pdir }}">..</td></tr>
+        {% else %}
+        <tr><td class="left"><a href="/" target="_top">..</td></tr>
+        {% endif %}
+        {% for file in files: %}
+        <tr>            
+        {% if file[2] != "" : %}
+	        <td class="left"><a href="/browse/{{ title }}/{{ file[2] }}">{{ file[0] }}</td><td align=right>{{ file[1] }} kB</td>
+	    {% else %}
+	        <td class="left">{{ file[0] }}</td><td align=right>{{ file[1] }} kB</td>
+	    {% endif %} 
+		</tr>
+	    {% endfor %}
+        </table>
 </body>
 </html>

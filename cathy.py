@@ -527,7 +527,10 @@ def searchFor(pth, searchterm, archive=False):
 	matches = []
 	# checks all .caf files in patt for a match with alls terms in searchlist
 	# archive option indicates if caf files with archive bit should be included in search
-	cafList = makeCafList(pth)
+	if '.caf' in pth:
+		cafList = [ pth ]
+	else:
+		cafList = makeCafList(pth)
 	for catname in cafList:
 		pathcatname = os.path.join(pth,catname)
 		cat = CathyCat.fast_from_file(pathcatname)

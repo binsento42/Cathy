@@ -25,7 +25,15 @@ td {
 	text-align: right;  
 }
 
-td.left {
+td.middle {
+	vertical-align: middle;
+}
+
+.centerscreen {
+	horizontal-align: middle;
+}
+
+.left {
 	text-align: left;  
 }
 
