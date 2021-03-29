@@ -10,7 +10,7 @@
         {% if pdir != "root": %}
         <tr><td class="left"><a href="/inbrowse/{{ title }}/{{ pdir }}">..</td></tr>
         {% else %}
-        <tr><td class="left"><a href="/">..</td></tr>
+        <tr><td class="left"><a href="/" target="_top">..</td></tr>
         {% endif %}
         {% for file in files: %}
         <tr>            
