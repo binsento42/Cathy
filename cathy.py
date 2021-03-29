@@ -512,16 +512,16 @@ class CathyCat() :
 def makeCafList(path):
 	# returns list of all .caf files in path using os.walk
 	lst = []
-	for root,dirs,files in os.walk(path):
-		for fil in files:
-			if ".caf" in fil[-4:]:
-				lst.append(fil)
+	for fil in os.listdir(path):
+		if ".caf" in fil[-4:]:
+			lst.append(fil)
 	return(lst)
 
 def searchFor(pth, searchterm, archive=False):
 	searchlist = searchterm.lower().split(' ')
 	matches = []
 	# checks all .caf files in patt for a match with alls terms in searchlist
+	# archive option indicates if caf files with archive bit should be included in search
 	cafList = makeCafList(pth)
 	for catname in cafList:
 		pathcatname = os.path.join(pth,catname)
