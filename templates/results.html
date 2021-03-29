@@ -7,12 +7,6 @@
         function goBack() {
             window.history.back();
         }
-        function changeUrl()
-        {
-            curl = window.location.href;
-            nurl = curl.replace("disksearch","browse")+"/0"
-            window.location.replace(nurl);
-        }
         </script>
     <body>
     	<h1>
@@ -21,7 +15,7 @@
     	</h1><hl>
     	<table>
             <th>Name</th><th>Size</th>
-            <tr><td><a href="#" onclick=goBack()>..</a></td></tr>
+            <tr><td class="left"><a href="#" onclick=goBack()>..</a></td></tr>
         {% for result in results: %}
         <tr>
 	        <td class="left">{{ result[0] }}</td><td align=right>{{ result[1] }} kB</td>

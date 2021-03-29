@@ -94,7 +94,7 @@ def browse(path="",dir_id="0"):
 
 	childs = mySort(currentcat.getChildren(cid) ,sort,{ 'name':0, 'size':1})
 
-	return render_template('browse.html', dirname=dirname, pdir=pdir, files=[(x[0],'{0:,.0f}'.format(int(x[1])/1000),x[2]) for x in childs])
+	return render_template('browse.html', title=path, dirname=dirname, pdir=pdir, files=[(x[0],'{0:,.0f}'.format(int(x[1])/1000),x[2]) for x in childs])
 
 
 
