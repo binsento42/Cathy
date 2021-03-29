@@ -18,8 +18,10 @@ cat.freesize
 cat.archive
 		
 cat.elm will contain every element (folder name ot filename)
-cat.elm[69] returns a tuple with (date, size, parent folder id, filename)
+cat.elm[69] returns a tuple with (date, size, parent folder id, filename) and if it is a dir with (date, -dir_id, parent folder id, filename)
+				where dir_id matches the cat.info index, so negative size indicates a dir.
 cat.info[folder id] returns a tuple (id, filecount, dirsize)
+	original Cathy does not include the id, but for internal python representation this is easier (to perform sort of info array)
 
 # Vincent continues with Jerome's code
 2021/03/09	All unpack formats fixed for endianness so the Python code will run on mac and linux systems
@@ -29,15 +31,17 @@ cat.info[folder id] returns a tuple (id, filecount, dirsize)
 			Added search functions
 2021/03/11	Refactored the code to allow empty constructor and classmethods so it will be possible to write scan function in python
 			- CathyCat.from_file(path)
-2012/03/12	Added new functionality
+2021/03/12	Added new functionality
 			- write function that can write a .caf file from a previously read file
 			- scan function that can create a .caf file, works for linux and osx. Windows not yet, but original Cathy (or CathyCmd) already works for windows.
-2012/03/13	Some more fixes
+2021/03/13	Some more fixes
 			- tree wouldn't render right in the original Cathy; this was some trial and error and mainly caused by the order of the items in the list
 			- free space corrected for different platforms
 			- wrestled with Unicode / Ascii / str / byte troubles
 			- added some hacks so the code will run with python 2 as well as 3
 			- added command line arguments implementation for the search and scan functions
+2012/03/25  Some functions changed and some new functions to implement a directory browsing option
+			- get_children() and lookup_dir_id(). One would expect the original lookup() function to work, but I'm not sure what this does.
 
 USAGE
 
@@ -47,7 +51,8 @@ python cathy.py search <searchitem>
 python cathy.py scan <path>
 # the same as scan but with Cathy archive set
 python cathy.py scanarchive <path>
-
+# display disk usage overview
+python cathy.py usage
 '''
 
 from __future__ import (print_function, division)
