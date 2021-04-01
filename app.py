@@ -1,6 +1,6 @@
 import cathy
 from flask import Flask, render_template, request, redirect
-import os
+import os, re
 from sys import argv
 
 cafpath = ""
@@ -10,6 +10,61 @@ disklist = None
 lastreverse = True
 currentcat = None
 lastlabel = None
+watch_ids = {}
+lastwatch = {}
+childs = []
+wcdfile = ""
+
+def findPngs(elm,fil):
+	if not os.path.isfile(os.path.join(cafpath,fil)):
+		return []
+	with open(os.path.join(cafpath,fil),"r") as fp:
+		watched = [x for x in set(fp.read().split('\n')) if len(x)>0]
+	pngs = {}
+	for el in elm:
+		if '.png' in el[3]:
+			#print(el[3])
+			mtch = re.match("(\d+)\.png",el[3])
+			watch_id = ""
+			try:
+				watch_id = mtch.group(1)
+			except Exception:
+				pass
+			if watch_id != "":
+				key = int(el[2])
+				if watch_id in watched:
+					pngs.update({key:(1,watch_id)})
+				else:
+					pngs.update({key:(0,watch_id)})
+
+	return pngs
+
+def myZip(inchilds,ids):
+	childs = []
+	for child in inchilds:
+		value=(-1,"")
+		if child[2] != "": # is a dir, check if it contains a malid png
+			key = int(child[2])
+			value = ids.get(key,(-1,""))
+		childs.append((child[0],child[1],child[2],value[0]))
+	return childs
+
+def saveWatchIDs(fil):
+	# protect from writing empty list after restart
+	if len(watch_ids) < 1:
+		return
+
+	if not os.path.isfile(fil):
+		return []
+	ids = []
+	for key in watch_ids:
+		val = watch_ids[key]
+		if val[0]:
+			ids.append(val[1])
+	ids.sort()
+	#print('\n'.join([str(x) for x in ids]))
+	with open(fil,"w") as fp:
+		fp.write('\n'.join([str(x) for x in ids]))
 
 def mySort(list,keyname,tdict):
 	# mysort takes the url sort parameter in keyname and uses tdict to get the key number
@@ -23,11 +78,17 @@ def mySort(list,keyname,tdict):
 
 @app.route("/")
 def index():
-	global disklist
-	global lastreverse
+	global disklist,lastreverse,wcdfile
+	
+	referrer = request.referrer
+	print(referrer)
+	if referrer and wcdfile.replace(".wch","") in referrer and len(watch_ids) > 0:
+		print("Savin watch IDs")
+		saveWatchIDs(os.path.join(cafpath,wcdfile))
+		#watch_ids = findPngs(currentcat.elm)
+	
+
 	sort = request.args.get('sort')
-	#url = request.base_url
-	#print(sort, url)
 	if disklist == None:
 		disklist = []
 		cafList = [x.replace(".caf","") for x in cathy.makeCafList(cafpath)]
@@ -43,39 +104,26 @@ def index():
 
 	return render_template('index.html', title='DISKS', files=[(x[0],'{0:,}'.format(x[1]),'{0:,}'.format(x[2]),'{0:,.1f}'.format(x[3]), x[4]) for x in disklist])
 
-@app.route("/inbrowse/<path>/<dir_id>")
-def inbrowse(path="",dir_id="0"):
-	#global currentcat
-	sort = request.args.get('sort')
-	cid = int(dir_id)
 
-	if cid != 0:
-		pdir = str(currentcat.elm[currentcat.lookup_dir_id(cid)][2])
-	else:
-		pdir = "root"
-
-	childs = mySort(currentcat.getChildren(cid) ,sort,{ 'name':0, 'size':1})
-
-	return render_template('inbrowse.html', title=path, dir_id=dir_id, pdir=pdir, files=[(x[0],'{0:,.0f}'.format(int(x[1])/1000),x[2]) for x in childs])
-
-@app.route("/oldbrowse/<path>/<dir_id>")
-def oldbrowse(path="",dir_id="0"):	
-	global currentcat, lastlabel
-	cid = int(dir_id)
-	if path != lastlabel:
-		print("reading file..")
-		caffile = os.path.join(cafpath,path+".caf")
-		currentcat = cathy.CathyCat.from_file(caffile)
-		lastlabel = path
-	if cid > 0:
-		dirname = currentcat.volume + ' - ' + currentcat.elm[currentcat.lookup_dir_id(cid)][3]
-	else:
-		dirname = currentcat.volume
-	return render_template('browse.html', title=path, dirname=dirname, dirid=dir_id)
-
-@app.route("/browse/<path>/<dir_id>")
+@app.route("/browse/<path>/<dir_id>",methods=["GET","POST"])
 def browse(path="",dir_id="0"):	
-	global currentcat, lastlabel
+	global currentcat, lastlabel, watch_ids, childs, wcdfile
+
+	if request.method == "POST":
+		watchboxes  =  request.form.getlist('watch')
+		#print(watchboxes)
+		for child in childs:
+			if child[2] != "":
+				tid = int(child[2])
+				try:
+					malid = watch_ids[tid][1]
+					if str(tid) in watchboxes:
+						watch_ids.update({tid:(1,malid)})
+					else:
+						watch_ids.update({tid:(0,malid)})
+				except Exception:
+					pass #apparently this child doesn't have a checkbox
+
 	sort = request.args.get('sort')
 	cid = int(dir_id)
 	if path != lastlabel:
@@ -94,7 +142,16 @@ def browse(path="",dir_id="0"):
 
 	childs = mySort(currentcat.getChildren(cid) ,sort,{ 'name':0, 'size':1})
 
-	return render_template('browse.html', title=path, dirname=dirname, pdir=pdir, files=[(x[0],'{0:,.0f}'.format(int(x[1])/1000),x[2]) for x in childs])
+	wcdfile = path+".wch"
+	if os.path.isfile(os.path.join(cafpath,wcdfile)):
+		if len(watch_ids) ==  0:
+			watch_ids = findPngs(currentcat.elm,wcdfile)
+		childs = myZip(childs,watch_ids)
+		return render_template('wbrowse.html', title=path, dirname=dirname, pdir=pdir, files=[(x[0],'{0:,.0f}'.format(int(x[1])/1000),x[2],x[3]) for x in childs])
+
+	else:
+		wcdfile = ""
+		return render_template('browse.html', title=path, dirname=dirname, pdir=pdir, files=[(x[0],'{0:,.0f}'.format(int(x[1])/1000),x[2]) for x in childs])
 
 
 
@@ -116,6 +173,7 @@ def search(path=""):
 		return render_template('results.html', title="results", search=req['search'], results=[(x[0],'{0:,}'.format(int(x[1]/1000))) for x in response])
 
 	return redirect('/')
+
 
 def main():
 	app.run(host='0.0.0.0', debug=True)

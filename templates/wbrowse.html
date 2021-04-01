@@ -1,0 +1,58 @@
+<html>
+<head>
+	<link rel="stylesheet" href='/static/main.css' />
+	<title>{{ dirname }}</title>
+</head>
+    <script>
+        function mySubmit1()
+        {
+            document.getElementById("myForm").submit();
+        }
+    </script>
+    <body>
+        <!--wbrowse-->
+    	<h1><a href="/"> &#8962</a> {{ dirname }}
+    		{% if pdir == "root": %}
+    	            <form action="/disksearch/{{ dirname }}" method="POST">
+                <div class="form-group">
+                    <input type="text" class="form-control" id="search" name="search" placeholder="Enter search term">
+                </div>
+            </form>
+            {% endif %}
+             
+		</h1><hl>
+        <form action="/browse/{{ title }}/{{ pdir }}" id="myForm" method="POST">
+    	<table>
+            <th></th>
+    		<th class="left"><table><tr><td class="left"><a href="#" onclick=window.location.replace("?sort=name")>Name</td>
+                <td>
+                </td></tr></table></th>
+    		<th><a href="#" onclick=window.location.replace("?sort=size")>Size</th>
+        {% if pdir != "root": %}
+        <tr><td></td><td class="left" onclick="mySubmit1()">..</td></tr>
+        <!--<tr><td></td><td class="left"><a href="/browse/{{ title }}/{{ pdir }}">..</td></tr>-->
+        {% else %}
+        <!--<form action="/" id="rootForm" method="POST">-->
+        <tr><td></td><td class="left"><a href="/">..</a></td></tr>
+        {% endif %}
+        {% for file in files: %}
+        <tr>            
+        {% if file[2] != "" : %}
+            {% if file[3] == -1: %}
+                <td></td><td class="left"><a href="/browse/{{ title }}/{{ file[2] }}">{{ file[0] }}</td><td align=right>{{ file[1] }} kB</td>
+            {% elif file[3] > 0: %}
+    	        <td><input type="checkbox" name="watch" value="{{ file[2] }}" checked onclick="myFunction({{ file[2] }})"></td>
+                    <td class="left"><a href="/browse/{{ title }}/{{ file[2] }}">{{ file[0] }}</td><td align=right>{{ file[1] }} kB</td>
+            {% else %}
+                <td><input type="checkbox" name="watch" value="{{ file[2] }}" onclick="myFunction({{ file[2] }})"></td>
+                    <td class="left"><a href="/browse/{{ title }}/{{ file[2] }}">{{ file[0] }}</td><td align=right>{{ file[1] }} kB</td>
+            {% endif %}
+	    {% else %}
+	        <td></td><td class="left">{{ file[0] }}</td><td align=right>{{ file[1] }} kB</td>
+	    {% endif %} 
+		</tr>
+	    {% endfor %}
+        </table>
+        </form>
+</body>
+</html>
