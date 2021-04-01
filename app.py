@@ -16,6 +16,7 @@ childs = []
 wcdfile = ""
 
 def findPngs(elm,fil):
+	print("findpNGS")
 	if not os.path.isfile(os.path.join(cafpath,fil)):
 		return []
 	with open(os.path.join(cafpath,fil),"r") as fp:
@@ -31,6 +32,17 @@ def findPngs(elm,fil):
 			except Exception:
 				pass
 			if watch_id != "":
+				key = int(el[2])
+				if watch_id in watched:
+					pngs.update({key:(1,watch_id)})
+				else:
+					pngs.update({key:(0,watch_id)})
+		elif '.jpg' in el[3]:
+			jpgname = el[3].replace('.jpg','')
+			watch_id = currentcat.parentof(el[3])
+			print("wid:",watch_id,jpgname)
+			if watch_id == el[3].replace('.jpg',''):
+				print("JPG Match:",watch_id)
 				key = int(el[2])
 				if watch_id in watched:
 					pngs.update({key:(1,watch_id)})
@@ -62,7 +74,7 @@ def saveWatchIDs(fil):
 		if val[0]:
 			ids.append(val[1])
 	ids.sort()
-	#print('\n'.join([str(x) for x in ids]))
+	print('\n'.join([str(x) for x in ids]))
 	with open(fil,"w") as fp:
 		fp.write('\n'.join([str(x) for x in ids]))
 
@@ -76,16 +88,36 @@ def mySort(list,keyname,tdict):
 	lastreverse = not lastreverse
 	return sorted(list,key=lambda x: x[keyno], reverse=lastreverse)
 
-@app.route("/")
+def update_watch_ids(childs,watchboxes):
+	for child in childs:
+		if child[2] != "":
+			tid = int(child[2])
+			try:
+				malid = watch_ids[tid][1]
+				if str(tid) in watchboxes:
+					watch_ids.update({tid:(1,malid)})
+					print("Add:",tid)
+				else:
+					watch_ids.update({tid:(0,malid)})
+					print("Remove:",tid)
+			except Exception:
+				pass #apparently this child doesn't have a checkbox
+
+
+@app.route("/",methods=["GET","POST"])
 def index():
-	global disklist,lastreverse,wcdfile
+	global disklist,lastreverse,wcdfile, watch_ids, childs
 	
+	if request.method == "POST":
+		watchboxes  =  request.form.getlist('watch')
+		update_watch_ids(childs,watchboxes)
+
 	referrer = request.referrer
-	print(referrer)
+	#print(referrer)
 	if referrer and wcdfile.replace(".wch","") in referrer and len(watch_ids) > 0:
 		print("Savin watch IDs")
 		saveWatchIDs(os.path.join(cafpath,wcdfile))
-		#watch_ids = findPngs(currentcat.elm)
+		watch_ids = []
 	
 
 	sort = request.args.get('sort')
@@ -111,18 +143,8 @@ def browse(path="",dir_id="0"):
 
 	if request.method == "POST":
 		watchboxes  =  request.form.getlist('watch')
+		update_watch_ids(childs,watchboxes)
 		#print(watchboxes)
-		for child in childs:
-			if child[2] != "":
-				tid = int(child[2])
-				try:
-					malid = watch_ids[tid][1]
-					if str(tid) in watchboxes:
-						watch_ids.update({tid:(1,malid)})
-					else:
-						watch_ids.update({tid:(0,malid)})
-				except Exception:
-					pass #apparently this child doesn't have a checkbox
 
 	sort = request.args.get('sort')
 	cid = int(dir_id)

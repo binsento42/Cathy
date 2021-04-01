@@ -21,19 +21,21 @@
             {% endif %}
              
 		</h1><hl>
-        <form action="/browse/{{ title }}/{{ pdir }}" id="myForm" method="POST">
+        <!--<form action="/browse/{{ title }}/{{ pdir }}" id="myForm" method="POST">-->
     	<table>
             <th></th>
-    		<th class="left"><table><tr><td class="left"><a href="#" onclick=window.location.replace("?sort=name")>Name</td>
+    		<th class="left"><table><tr><td class="left"><a href="#" onclick=window.location.replace("?sort=name")>Name</a></td>
                 <td>
                 </td></tr></table></th>
-    		<th><a href="#" onclick=window.location.replace("?sort=size")>Size</th>
+    		<th><a href="#" onclick=window.location.replace("?sort=size")>Size</a></th>
         {% if pdir != "root": %}
+        <form action="/browse/{{ title }}/{{ pdir }}" id="myForm" method="POST">
         <tr><td></td><td class="left" onclick="mySubmit1()">..</td></tr>
         <!--<tr><td></td><td class="left"><a href="/browse/{{ title }}/{{ pdir }}">..</td></tr>-->
         {% else %}
         <!--<form action="/" id="rootForm" method="POST">-->
-        <tr><td></td><td class="left"><a href="/">..</a></td></tr>
+        <form action="/" id="myForm" method="POST">
+        <tr><td></td><td class="left" onclick="mySubmit1()">..</a></td></tr>
         {% endif %}
         {% for file in files: %}
         <tr>            
@@ -52,7 +54,7 @@
 	    {% endif %} 
 		</tr>
 	    {% endfor %}
-        </table>
         </form>
+        </table>
 </body>
 </html>

@@ -1,3 +1,4 @@
+pyvenv.cfg
 .DS_Store
 bin*
 *.caf
