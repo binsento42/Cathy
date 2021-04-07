@@ -482,17 +482,22 @@ class CathyCat() :
 		return (dir_id,filecnt,tsize)
 
 	@classmethod
-	def scan(cls,start_path):
+	def scan(cls,start_path, no_disk=False):
 		# the scan function initializes the global caf parameters then calls the recursive scandir function
 		pathcat = start_path		# catalogfilename in the cathy's ui
 		date = int(time.time())		# caf creation date
 		device = start_path			# for device now the start_path is used, for win this is prob drive letter, but for linux this will be the root dir
-		volume = cls.get_label(start_path)
+		if no_disk:
+			volume = os.path.basename(start_path)
+			serial = '0000-0000'
+			freesize = 0
+		else:
+			volume = cls.get_label(start_path)
+			serial = cls.get_serial(start_path)
+			freesize = cls.get_free_space(start_path)
 		alias = volume
 		volumename = volume
-		serial = cls.get_serial(start_path)
 		comment = ""
-		freesize = cls.get_free_space(start_path)
 		archive = 0
 
 		# init empty CathyCat class
@@ -562,8 +567,22 @@ if __name__ == '__main__':
 	if len(argv) >2:
 		if "search" in argv[1]:
 			searchFor(pth,argv[2])
+
+		elif "dirscan" in argv[1]:
+			scanpath =argv[2]
+			scanpath = os.path.normpath(scanpath)
+			#if scanpath[-1] == '/' or scanpath[-1] == '\\':
+			#	scanpath = scanpath[:-1]
+			print("Scanning:",scanpath,"...")
+			cat = CathyCat.scan(scanpath,no_disk=True)
+			if "archive" in argv[1]:
+				print("Setting archive bit!")
+				cat.archive = 1
+			savename = os.path.join(os.getcwd(),cat.volume+".caf")
+			print("Saving to:",savename)
+			cat.write(savename)
 		
-		if "scan" in argv[1]:
+		elif "scan" in argv[1]:
 			scanpath =argv[2]
 			scanpath = os.path.normpath(scanpath)
 			#if scanpath[-1] == '/' or scanpath[-1] == '\\':
@@ -577,7 +596,8 @@ if __name__ == '__main__':
 			print("Saving to:",savename)
 			cat.write(savename)
 
-		if "setarchive" in argv[1]:
+
+		elif "setarchive" in argv[1]:
 			setpath = os.path.join(pth,argv[2])
 			cat = CathyCat.from_file(setpath)
 			cat.archive = 1
