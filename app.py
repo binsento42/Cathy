@@ -153,6 +153,7 @@ def browse(path="",dir_id="0"):
 		caffile = os.path.join(cafpath,path+".caf")
 		currentcat = cathy.CathyCat.from_file(caffile)
 		lastlabel = path
+		watch_ids = {}
 	if cid > 0:
 		dirname = currentcat.volume + ' - ' + currentcat.elm[currentcat.lookup_dir_id(cid)][3]
 	else:
@@ -174,7 +175,6 @@ def browse(path="",dir_id="0"):
 	else:
 		wcdfile = ""
 		return render_template('browse.html', title=path, dirname=dirname, pdir=pdir, files=[(x[0],'{0:,.0f}'.format(int(x[1])/1000),x[2]) for x in childs])
-
 
 
 @app.route("/disksearch/<path>", methods=["GET", "POST"])
