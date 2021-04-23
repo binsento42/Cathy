@@ -24,6 +24,10 @@ Usage:
 
   provides a list of all cataloged disks (caf files) with their free/used/total space.
 
+<b>python cathy.py export <i>caf-file</i></b>
+
+  creates a csv export file with the same name as the caf file but csv format and extension
+
 <b>Browser GUI based on Flask</b>
 
 A first Python Flask browser implementation is now also provided. You'll need flask. Do 'pip install flask'

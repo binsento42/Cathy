@@ -112,12 +112,14 @@ class CathyCat() :
 			m_sVersion= int(ul/CathyCat.ulModus)
 		else :
 			cls.buffer.close()
+			print("Incorrect magic number for caf file", pathcatname,"(",ul%CathyCat.ulModus,")")
 			return
 		
 		if m_sVersion > 2 :
 			m_sVersion = cls.readbuf('h')
 		
 		if m_sVersion > CathyCat.sVersion :
+			print("Incompatible caf version for", pathcatname, "(",m_sVersion,")")
 			return
 		
 		# m_timeDate
@@ -602,6 +604,15 @@ if __name__ == '__main__':
 			cat = CathyCat.from_file(setpath)
 			cat.archive = 1
 			cat.write(setpath)
+
+		elif "export" in argv[1]:
+			setpath = os.path.join(pth,argv[2])
+			cat = CathyCat.from_file(setpath)
+			with open(setpath.replace(".caf",".csv"),"w") as fp:
+				for i in range(len(cat.elm)):
+					if cat.elm[i][1] > 0:
+						fp.write(cat.elm[i][3]+'\t'+str(cat.elm[i][1])+'\t'+cat.path(i).replace(cat.elm[i][3],'')+'\n')
+
 
 	elif len(argv) == 2:
 		if "usage" in argv[1]:
