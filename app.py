@@ -40,7 +40,7 @@ def findPngs(elm,fil):
 		elif '.jpg' in el[3]:
 			jpgname = el[3].replace('.jpg','')
 			watch_id = currentcat.parentof(el[3])
-			print("wid:",watch_id,jpgname)
+			#print("wid:",watch_id,jpgname)
 			if watch_id == el[3].replace('.jpg',''):
 				print("JPG Match:",watch_id)
 				key = int(el[2])
