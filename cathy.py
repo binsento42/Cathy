@@ -43,7 +43,10 @@ cat.info[folder id] returns a tuple (id, filecount, dirsize)
 2021/03/25  Some functions changed and some new functions to implement a directory browsing option
 			- get_children() and lookup_dir_id(). One would expect the original lookup() function to work, but I'm not sure what this does.
 2022/03/10  Added support for m_sVersion 8 by changing the m_sPathName to '<L' (was 'H' in version 7 and older)
-
+            This is what was probably removed at 21/03/10, but that implemenation lacked backward compatibility..
+2022/03/11  Added support for v8 filesave, but still defaults to v7
+2022/08/05  Fixed support for foreign characters (see github issue)
+2022/08/28  Fixed a bug (saveVersion -> self.saveVersion)
 
 USAGE
 
@@ -81,7 +84,8 @@ class CathyCat():
     ulMagicBase = 500410407
     # ulMagicBase =     251327015
     ulModus = 1000000000
-    saveVersion = 7
+    #saveVersion = 7
+    saveVersion = 8
     sVersion = 8  # got a 7 in the .cpp file you share with me, but got an 8 in my .cat testfile genrated in cathy v2.31.3
 
     delim = b'\x00'
@@ -282,7 +286,10 @@ class CathyCat():
             self.writebuf('<L', el[0])  # date
             # print(el[1])
             self.writebuf('<q', el[1])  # size or folderid
-            self.writebuf('H', el[2])  # parentfolderid
+            if self.saveVersion == 7:
+                self.writebuf('H', el[2])  # parentfolderid
+            else:
+                self.writebuf('<L', el[2])  # parentfolderid
             self.writestring(el[3])  # filename
 
         self.buffer.close()
@@ -397,7 +404,7 @@ class CathyCat():
                 break
             else:
                 try:
-                    chain += chr.decode()
+                    chain += chr.decode('unicode_escape')
                 except:
                     pass
         return chain
@@ -588,6 +595,8 @@ def searchFor(pth, searchterm, archive=False):
             for i in range(len(cat.elm)):
                 FOUND = True
                 for term in searchlist:
+                    if version_info[0] == 2:
+                        term = term.decode('utf-8').lower()
                     if not term in cat.elm[i][3].lower():
                         FOUND = False
                         break
