@@ -47,6 +47,7 @@ cat.info[folder id] returns a tuple (id, filecount, dirsize)
 2022/03/11  Added support for v8 filesave, but still defaults to v7
 2022/08/05  Fixed support for foreign characters (see github issue)
 2022/08/28  Fixed a bug (saveVersion -> self.saveVersion)
+2022/09/14  Replaced the readstring function by a new version that should work better with UTF-8!?
 
 USAGE
 
@@ -134,6 +135,7 @@ class CathyCat():
         if m_sVersion > CathyCat.sVersion:
             print("Incompatible caf version for", pathcatname, "(", m_sVersion, ")")
             return
+        #print(f"Version: {m_sVersion}")
 
         # m_timeDate
         m_timeDate = ctime(cls.readbuf('<L'))  # 4 bytes
@@ -218,7 +220,7 @@ class CathyCat():
                 # m_lLength = cls.buffer.read(8)
                 m_lLength = cls.readbuf('<q')  # 8 bytes
             if m_sVersion > 7:
-                m_sPathName = cls.readbuf('<L')  # 2 bytes
+                m_sPathName = cls.readbuf('<L')  # 4 bytes
             else:
                 m_sPathName = cls.readbuf('H')  # 2 bytes
             m_pszName = cls.readstring()
@@ -396,7 +398,7 @@ class CathyCat():
 
     # private. parser string. arbitrary length. delimited by a 0 at its end
     @ classmethod
-    def readstring(cls):
+    def readstring_old(cls):
         chain = ''
         while 1:
             chr = cls.readbuf('s')
@@ -408,6 +410,21 @@ class CathyCat():
                 except:
                     pass
         return chain
+
+    # private. parser string. arbitrary length. delimited by a 0 at its end
+    @ classmethod
+    def readstring(cls):
+        chain = []
+        while 1:
+            chr = cls.buffer.read(1)
+            if chr == CathyCat.delim:
+                break
+            else:
+                try:
+                    chain.append(chr)
+                except:
+                    pass
+        return b''.join(chain).decode('latin1')
 
     def writestring(self, inp):
         if version_info[0] == 2:
